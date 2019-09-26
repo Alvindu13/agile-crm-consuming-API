@@ -1,12 +1,12 @@
+package com.agilecrm;
+
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 @XmlRootElement(name = "event")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -152,7 +152,7 @@ public class Event {
 
     @Override
     public String toString() {
-        return "Event{" +
+        return "com.agilecrm.Event{" +
                 "id=" + id +
                 ", map='" + map + '\'' +
                 ", allDay=" + allDay +

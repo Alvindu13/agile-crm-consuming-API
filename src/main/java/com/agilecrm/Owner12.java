@@ -1,3 +1,5 @@
+package com.agilecrm;
+
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -111,7 +113,7 @@ public class Owner12 {
 
     @Override
     public String toString() {
-        return "Owner12{" +
+        return "com.agilecrm.Owner12{" +
                 "id=" + id +
                 ", domain='" + domain + '\'' +
                 ", email='" + email + '\'' +

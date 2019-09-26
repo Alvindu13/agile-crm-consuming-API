@@ -1,11 +1,10 @@
+package com.agilecrm;
 
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.*;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.filter.HttpBasicAuthFilter;
@@ -17,9 +16,12 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -31,6 +33,8 @@ public class CreateExcelDemoProd {
     private static final String url = "x";
     private static final String apiKey = "x";
     private static final String userMail = "x";
+    private static HSSFWorkbook workbook = new HSSFWorkbook();
+
 
 
     private static HSSFCellStyle createStyleForTitle(HSSFWorkbook workbook) {
@@ -43,22 +47,47 @@ public class CreateExcelDemoProd {
 
     private static String convertEpochToDateString(Integer unixSeconds){
         // convert seconds to milliseconds
-        Date date = new Date(unixSeconds*1000L);
+        Date date = new java.util.Date(unixSeconds*1000L);
         // the format of your date
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+        SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
         // give a timezone reference for formatting (see comment at the bottom)
         sdf.setTimeZone(java.util.TimeZone.getTimeZone("GMT-4"));
         String formattedDate = sdf.format(date);
-        System.out.println(formattedDate);
         return formattedDate;
     }
 
 
     public static void main(String[] args) throws IOException {
 
+        GUIInterface guiInterface = new GUIInterface();
+        guiInterface.runInterfaceGUI();
+
+    }
+
+
+    public static void generateFile(LocalDate localDateStart, LocalDate localDateEnd) throws IOException, ParseException {
+
+        workbook = null;
+        workbook = new HSSFWorkbook();
+
+        final String strDate1 = localDateStart.toString();
+        Long millis1 = new SimpleDateFormat("yyyy-MM-dd").parse(strDate1).getTime();
+        final String strDate2 = localDateEnd.toString();
+        Long millis2 = new SimpleDateFormat("yyyy-MM-dd").parse(strDate2).getTime();
+        Long startL = millis1/1000;
+        Long endL = millis2/1000;
+        String startChoose = startL.toString();
+        String endChoose = endL.toString();
+
+        System.out.println(startChoose);
+        System.out.println(endChoose);
+
+
+
+
+
         //-----------Partie CONFIG EXCEL--------
         //Creation d'une sheet et d'une methode pour EXCEL
-        HSSFWorkbook workbook = new HSSFWorkbook();
         HSSFSheet sheet = workbook.createSheet("Evenements sheet");
 
         int rownum = 0;
@@ -66,6 +95,7 @@ public class CreateExcelDemoProd {
         Row row;
 
         HSSFCellStyle style = createStyleForTitle(workbook);
+        HSSFCellStyle cellStyle = null;
 
         row = sheet.createRow(rownum);
 
@@ -86,7 +116,7 @@ public class CreateExcelDemoProd {
         cell = row.createCell(3, CellType.STRING);
         cell.setCellValue("Date_End");
         cell.setCellStyle(style);
-        // Event Start ?
+        // com.agilecrm.Event Start ?
         cell = row.createCell(4, CellType.STRING);
         cell.setCellValue("Start ?");
         cell.setCellStyle(style);
@@ -100,29 +130,33 @@ public class CreateExcelDemoProd {
                 .target(url)
                 .register(new HttpBasicAuthFilter(userMail, apiKey))
                 .path("/events")
-                .queryParam("start", "1559448739")
-                .queryParam("end", "1579448739")
+                .queryParam("start", startChoose)
+                .queryParam("end", endChoose)
                 .request(MediaType.APPLICATION_JSON)
                 .get(String.class);
 
         System.out.println(entityEvents);
 
+
         JSONArray jsonArray = new JSONArray(entityEvents);
         List<Event> events = new ArrayList<Event>();
 
 
-        for(int i =0; i< jsonArray.length(); i++){
-            if(jsonArray.get(i) instanceof JSONObject){
+        for(int i =0; i< jsonArray.length(); i++)
+            if (jsonArray.get(i) instanceof JSONObject) {
 
-                JSONObject jsnObj = (JSONObject)jsonArray.get(i);
+                JSONObject jsnObj = (JSONObject) jsonArray.get(i);
                 ObjectMapper mapper = new ObjectMapper();
-                Owner12 owner1 = mapper.readValue(String.valueOf(jsnObj.get("owner")), Owner12.class);
 
-                String title = (String)jsnObj.get("title");
-                Integer createTime = (Integer)jsnObj.get("created_time");
-                Integer start = (Integer)jsnObj.get("start");
-                Integer end = (Integer)jsnObj.get("end");
-                Boolean isEventStarred = (Boolean)jsnObj.get("is_event_starred");
+
+
+
+
+                String title = (String) jsnObj.get("title");
+                Integer createTime = (Integer) jsnObj.get("created_time");
+                Integer start = (Integer) jsnObj.get("start");
+                Integer end = (Integer) jsnObj.get("end");
+                Boolean isEventStarred = (Boolean) jsnObj.get("is_event_starred");
 
                 Event event = new Event();
                 event.setTitle(title);
@@ -130,22 +164,28 @@ public class CreateExcelDemoProd {
                 event.setStart(start);
                 event.setStart(end);
                 event.setIs_event_starred(isEventStarred);
-                event.setOwners(owner1);
 
-                System.out.println(event.getStart());
+                if (jsnObj.has("owner")){
+                    Owner12 owner1 = mapper.readValue(String.valueOf(jsnObj.get("owner")), Owner12.class);
+                    event.setOwners(owner1);
+                }
 
                 events.add(event);
             }
-        }
+
+
 
         // Data
         for (Event event : events) {
             rownum++;
             row = sheet.createRow(rownum);
-
             // Evenement (A)
             cell = row.createCell(0, CellType.STRING);
             cell.setCellValue(event.getTitle());
+            sheet.setColumnWidth((short)5,(short)(5*256));
+            cellStyle = workbook.createCellStyle();
+            cell.setCellStyle(cellStyle);
+
             // Propritaire (B)
             cell = row.createCell(1, CellType.STRING);
             cell.setCellValue(event.getOwners().getName());
@@ -154,20 +194,34 @@ public class CreateExcelDemoProd {
             String dateStartString = convertEpochToDateString(event.getStart());
             cell.setCellValue(dateStartString);
             // Grade (D)
-            /*cell = row.createCell(3, CellType.NUMERIC);
-            cell.setCellValue(emp.getGrade());
-            // Bonus (E)
-            String formula = "0.1*C" + (rownum + 1) + "*D" + (rownum + 1);
-            cell = row.createCell(4, CellType.FORMULA);
-            cell.setCellFormula(formula);*/
+                /*cell = row.createCell(3, CellType.NUMERIC);
+                cell.setCellValue(emp.getGrade());
+                // Bonus (E)
+                String formula = "0.1*C" + (rownum + 1) + "*D" + (rownum + 1);
+                cell = row.createCell(4, CellType.FORMULA);
+                cell.setCellFormula(formula);*/
         }
+
+        try {
+            saveExcel();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+
+    public static void saveExcel() throws FileNotFoundException {
         File file = new File("C:/demo/evenements_agile.xls");
         file.getParentFile().mkdirs();
-
         FileOutputStream outFile = new FileOutputStream(file);
-        workbook.write(outFile);
+        try {
+            workbook.write(outFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         System.out.println("Created file: " + file.getAbsolutePath());
-
     }
 
 }
