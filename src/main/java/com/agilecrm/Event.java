@@ -22,6 +22,9 @@ public class Event {
     @JsonProperty("allDay")
     private Boolean allDay;
 
+    @JsonProperty("description")
+    private String description;
+
     @JsonProperty("color")
     private String color;
 
@@ -48,10 +51,11 @@ public class Event {
     public Event() {
     }
 
-    public Event(Long id, String map, Boolean allDay, String color, String[] contacts, Integer created_time, Integer end, Boolean is_event_starred, Integer start, String title, Owner12 owners) {
+    public Event(Long id, String map, Boolean allDay, String description, String color, String[] contacts, Integer created_time, Integer end, Boolean is_event_starred, Integer start, String title, Owner12 owners) {
         this.id = id;
         this.map = map;
         this.allDay = allDay;
+        this.description = description;
         this.color = color;
         this.contacts = contacts;
         this.created_time = created_time;
@@ -150,12 +154,21 @@ public class Event {
         this.owners = owners;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public String toString() {
-        return "com.agilecrm.Event{" +
+        return "Event{" +
                 "id=" + id +
                 ", map='" + map + '\'' +
                 ", allDay=" + allDay +
+                ", description='" + description + '\'' +
                 ", color='" + color + '\'' +
                 ", contacts=" + Arrays.toString(contacts) +
                 ", created_time=" + created_time +
@@ -163,6 +176,7 @@ public class Event {
                 ", is_event_starred=" + is_event_starred +
                 ", start=" + start +
                 ", title='" + title + '\'' +
+                ", owners=" + owners +
                 '}';
     }
 }

@@ -43,7 +43,7 @@ public class GUIInterface extends Application {
         LocalDate ldt = LocalDate.now();
 
         VBox root = new VBox();
-        Scene scene = new Scene(root, 600, 250);
+        Scene scene = new Scene(root, 250, 250);
 
         root.setSpacing(10);
         root.setPadding(new Insets(15,20, 10,10));

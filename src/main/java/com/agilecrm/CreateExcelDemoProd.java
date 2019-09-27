@@ -118,8 +118,21 @@ public class CreateExcelDemoProd {
         cell.setCellStyle(style);
         // com.agilecrm.Event Start ?
         cell = row.createCell(4, CellType.STRING);
-        cell.setCellValue("Start ?");
+        cell.setCellValue("e-mail du propriétaire");
         cell.setCellStyle(style);
+        // com.agilecrm.Event Start ?
+        cell = row.createCell(5, CellType.STRING);
+        cell.setCellValue("téléphone du propriétaire");
+        cell.setCellStyle(style);
+        // com.agilecrm.Event Start ?
+        cell = row.createCell(6, CellType.STRING);
+        cell.setCellValue("Date Création");
+        cell.setCellStyle(style);
+        // com.agilecrm.Event Start ?
+        cell = row.createCell(7, CellType.STRING);
+        cell.setCellValue("Description");
+        cell.setCellStyle(style);
+
 
         //--------------Partie CONFIG API--------------
         ClientConfig config = new ClientConfig();
@@ -148,22 +161,25 @@ public class CreateExcelDemoProd {
                 JSONObject jsnObj = (JSONObject) jsonArray.get(i);
                 ObjectMapper mapper = new ObjectMapper();
 
-
-
-
-
                 String title = (String) jsnObj.get("title");
                 Integer createTime = (Integer) jsnObj.get("created_time");
                 Integer start = (Integer) jsnObj.get("start");
                 Integer end = (Integer) jsnObj.get("end");
                 Boolean isEventStarred = (Boolean) jsnObj.get("is_event_starred");
 
+
+
                 Event event = new Event();
                 event.setTitle(title);
                 event.setCreated_time(createTime);
                 event.setStart(start);
-                event.setStart(end);
+                event.setEnd(end);
+                //System.err.println(event.getEnd());
                 event.setIs_event_starred(isEventStarred);
+                if (jsnObj.has("description")) {
+                    String description = (String) jsnObj.get("description");
+                    event.setDescription(description);
+                }
 
                 if (jsnObj.has("owner")){
                     Owner12 owner1 = mapper.readValue(String.valueOf(jsnObj.get("owner")), Owner12.class);
@@ -189,15 +205,39 @@ public class CreateExcelDemoProd {
             // Propritaire (B)
             cell = row.createCell(1, CellType.STRING);
             cell.setCellValue(event.getOwners().getName());
+
             // Date_Start (C)
             cell = row.createCell(2, CellType.NUMERIC);
             String dateStartString = convertEpochToDateString(event.getStart());
             cell.setCellValue(dateStartString);
-            // Grade (D)
+
+            // Date_End (D)
+            cell = row.createCell(3, CellType.NUMERIC);
+            String dateEndString = convertEpochToDateString(event.getEnd());
+            cell.setCellValue(dateEndString);
                 /*cell = row.createCell(3, CellType.NUMERIC);
-                cell.setCellValue(emp.getGrade());
-                // Bonus (E)
-                String formula = "0.1*C" + (rownum + 1) + "*D" + (rownum + 1);
+                cell.setCellValue(emp.getGrade());*/
+
+            // E-mail proprio (E)
+            cell = row.createCell(4, CellType.STRING);
+            cell.setCellValue(event.getOwners().getEmail());
+
+            // Telephone proprio (F)
+            cell = row.createCell(5, CellType.NUMERIC);
+            cell.setCellValue(event.getOwners().getPhone());
+
+
+            // Date création (G)
+            cell = row.createCell(6, CellType.NUMERIC);
+            String createdTimeString = convertEpochToDateString(event.getCreated_time());
+            cell.setCellValue(createdTimeString);
+
+
+            // Description (H)
+            cell = row.createCell(7, CellType.NUMERIC);
+            cell.setCellValue(event.getDescription());
+
+                /*String formula = "0.1*C" + (rownum + 1) + "*D" + (rownum + 1);
                 cell = row.createCell(4, CellType.FORMULA);
                 cell.setCellFormula(formula);*/
         }
@@ -213,7 +253,8 @@ public class CreateExcelDemoProd {
 
 
     public static void saveExcel() throws FileNotFoundException {
-        File file = new File("C:/demo/evenements_agile.xls");
+        //File file = new File("C:/demo/evenements_agile.xls");
+        File file = new File("./evenements_agile.xls");
         file.getParentFile().mkdirs();
         FileOutputStream outFile = new FileOutputStream(file);
         try {
