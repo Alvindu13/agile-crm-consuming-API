@@ -10,8 +10,11 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.filter.HttpBasicAuthFilter;
 import org.glassfish.jersey.filter.LoggingFilter;
 import org.json.JSONArray;
+import static java.util.stream.Collectors.joining;
 import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
 
+import javax.json.JsonArray;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
@@ -133,12 +136,16 @@ public class CreateExcelDemo {
             cell = row.createCell(6, CellType.STRING);
             cell.setCellValue("téléphone du propriétaire");
             cell.setCellStyle(style);
-            // Date_Created
+            // Deals
             cell = row.createCell(7, CellType.STRING);
+            cell.setCellValue("Affaires liées");
+            cell.setCellStyle(style);
+            // Date_Created
+            cell = row.createCell(8, CellType.STRING);
             cell.setCellValue("Date Création");
             cell.setCellStyle(style);
             // Description
-            cell = row.createCell(8, CellType.STRING);
+            cell = row.createCell(9, CellType.STRING);
             cell.setCellValue("Description");
             cell.setCellStyle(style);
 
@@ -163,11 +170,16 @@ public class CreateExcelDemo {
 
 
             JSONArray jsonArray = new JSONArray(entityEvents);
+
             List<Event> events = new ArrayList<Event>();
 
 
-            for(int i =0; i< jsonArray.length(); i++)
+
+        for(int i =0; i< jsonArray.length(); i++)
                 if (jsonArray.get(i) instanceof JSONObject) {
+
+                    List<String> dealNames = new ArrayList<>();
+
 
                     JSONObject jsnObj = (JSONObject) jsonArray.get(i);
                     ObjectMapper mapper = new ObjectMapper();
@@ -193,6 +205,28 @@ public class CreateExcelDemo {
                         Owner12 owner1 = mapper.readValue(String.valueOf(jsnObj.get("owner")), Owner12.class);
                         event.setOwners(owner1);
                     }
+
+
+                    //String dealName = jsnObj.getJSONArray("deals").getString(0);
+                    //System.out.println(dealName);
+                    //String testD = ((JSONObject) jsonArray.get(i)).getString("deals");
+                    //System.out.println(((JSONObject) jsonArray.get(i)).getJSONArray("deals"));
+
+                    JSONArray testK = ((JSONObject) jsonArray.get(i)).getJSONArray("deals");
+                    //System.out.println(testK.length());
+
+                    for (int j = 0; j < testK.length(); j++) {
+                        if (testK.get(j) instanceof JSONObject) {
+                            JSONObject jsnObjK = (JSONObject) testK.get(j);
+                            if (jsnObjK.has("name")) {
+                                String nameDEAL = (String) jsnObjK.get("name");
+                                System.out.println(nameDEAL);
+                                dealNames.add(nameDEAL);
+                            }
+                        }
+                    }
+
+                    event.setDealName(dealNames);
 
                     events.add(event);
                 }
@@ -239,8 +273,7 @@ public class CreateExcelDemo {
                 System.out.println("hours = " + timeWorkHours);
 
                 cell.setCellValue(timeWorkHours);
-                /*cell = row.createCell(3, CellType.NUMERIC);
-                cell.setCellValue(emp.getGrade());*/
+
 
                 // E-mail proprio (F)
                 cell = row.createCell(5, CellType.STRING);
@@ -251,14 +284,21 @@ public class CreateExcelDemo {
                 cell.setCellValue(event.getOwners().getPhone());
 
 
+                //Deals
+                cell = row.createCell(7, CellType.STRING);
+                final String joined = event.getDealsName().stream()
+                        .collect(joining(" "));
+                cell.setCellValue(joined);
+
+
                 // Date création (H)
-                cell = row.createCell(7, CellType.NUMERIC);
+                cell = row.createCell(8, CellType.NUMERIC);
                 String createdTimeString = convertEpochToDateString(event.getCreated_time());
                 cell.setCellValue(createdTimeString);
 
 
                 // Description (H)
-                cell = row.createCell(8, CellType.NUMERIC);
+                cell = row.createCell(9, CellType.NUMERIC);
                 cell.setCellValue(event.getDescription());
 
                 /*String formula = "0.1*C" + (rownum + 1) + "*D" + (rownum + 1);

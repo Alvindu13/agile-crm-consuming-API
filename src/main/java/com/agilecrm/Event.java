@@ -6,7 +6,9 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @XmlRootElement(name = "event")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -48,10 +50,13 @@ public class Event {
 
     private Owner12 owners = new Owner12();
 
+    private List<String> dealsName = new ArrayList<>();
+
+
     public Event() {
     }
 
-    public Event(Long id, String map, Boolean allDay, String description, String color, String[] contacts, Integer created_time, Integer end, Boolean is_event_starred, Integer start, String title, Owner12 owners) {
+    public Event(Long id, String map, Boolean allDay, String description, String color, String[] contacts, Integer created_time, Integer end, Boolean is_event_starred, Integer start, String title, Owner12 owners, List<String> dealsName) {
         this.id = id;
         this.map = map;
         this.allDay = allDay;
@@ -64,6 +69,7 @@ public class Event {
         this.start = start;
         this.title = title;
         this.owners = owners;
+        this.dealsName = dealsName;
     }
 
     public Long getId() {
@@ -162,6 +168,14 @@ public class Event {
         this.description = description;
     }
 
+    public List<String> getDealsName() {
+        return dealsName;
+    }
+
+    public void setDealName(List<String> dealsName) {
+        this.dealsName = dealsName;
+    }
+
     @Override
     public String toString() {
         return "Event{" +
@@ -177,6 +191,7 @@ public class Event {
                 ", start=" + start +
                 ", title='" + title + '\'' +
                 ", owners=" + owners +
+                ", dealsName=" + dealsName +
                 '}';
     }
 }
